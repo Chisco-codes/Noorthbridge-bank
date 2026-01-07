@@ -1,0 +1,122 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Northbridge Bank - Secure Online Banking</title>
+    <link rel="stylesheet" href="styles.css">
+    <link rel="icon" href="data:,">    
+</head>
+<body>
+    <header>
+        <nav>
+            <div class="logo">
+                <img src="https://www.nbfc.com/wp-content/uploads/2015/06/white-nb_fairfax_smallscaleuses_PMSC-EN.png" alt="Northbridge Bank Logo" height="50">
+                <h1>Northbridge Bank</h1>
+            </div>
+            <div class="hamburger" id="hamburger">
+                <span></span>
+                <span></span>
+                <span></span>
+            </div>
+            <ul id="nav-menu">
+                <li><a href="#home">Home</a></li>
+                <li><a href="#about">About</a></li>
+                <li><a href="#contact">Contact</a></li>
+                <li><a href="#" id="login-link">Login</a></li>
+                <li><a href="#" id="register-link">Register</a></li>
+            </ul>
+        </nav>
+    </header>
+
+    <section id="home" class="hero">
+        <div class="hero-content">
+            <h2>Banking Built for the Future</h2>
+            <p>Experience secure, fast, and innovative online banking with Northbridge Bank — your trusted financial partner.</p>
+            <ul class="features-list" style="list-style: none; padding: 0; margin: 20px 0;">
+                <li>✔ Instant Transfers</li>
+                <li>✔ Real-Time Balance Tracking</li>
+                <li>✔ 256-Bit Encryption</li>
+                <li>✔ 24/7 Customer Support</li>
+            </ul>
+            <button id="get-started-btn">Open Your Account Today</button>
+            <p style="margin-top: 20px; font-size: 14px; color: #666;">
+                <strong>Secure • Regulated • Trusted Since 2026</strong>
+            </p>
+        </div>
+        <div class="hero-image">
+            <img src="image/banking-image.png" alt="Secure Online Banking with Northbridge Bank">
+        </div>
+    </section>
+
+    <section id="about">
+        <h2>About Northbridge Bank</h2>
+        <p>
+            Northbridge Bank is a modern digital bank committed to providing secure, innovative, and customer-focused financial services. 
+            We combine cutting-edge technology with trusted banking principles to deliver an exceptional experience.
+        </p>
+        <p>
+            Your funds are protected with industry-leading security, and our platform is designed for simplicity, speed, and reliability.
+        </p>
+        <p style="font-style: italic; color: #003366;">
+            "Bridging your financial future — securely and seamlessly."
+        </p>
+    </section>
+
+    <section id="contact">
+        <h2>Contact Us</h2>
+        <p>We’re here to help you 24/7.</p>
+        <p>
+            <strong>Email:</strong> support@northbridgebank.com<br>
+            <strong>Phone:</strong> 1-800-NORTHBRIDGE (1-800-667-8427)<br>
+            <strong>Address:</strong> 456 Bridge Street, Toronto, ON M5V 2B3, Canada
+        </p>
+        <p style="margin-top: 20px; font-size: 14px; color: #666;">
+            Member Protected • Encrypted Connections • Privacy Guaranteed
+        </p>
+    </section>
+
+    <!-- Auth Section (Hidden by default) -->
+    <div id="auth-section" style="display: none;">
+        <div id="login-form">
+            <h2>Login to Your Account</h2>
+            
+            <div style="margin-bottom: 20px;">
+                <input type="email" id="login-email" placeholder="Email" required style="width:100%; padding:12px; border-radius:8px; border:1px solid #ccc;">
+                <p id="login-email-error" style="color:#dc3545; font-size:14px; margin:5px 0 0; min-height:20px;"></p>
+            </div>
+
+            <div style="margin-bottom: 20px;">
+                <input type="password" id="login-password" placeholder="Password" required style="width:100%; padding:12px; border-radius:8px; border:1px solid #ccc;">
+                <p id="login-password-error" style="color:#dc3545; font-size:14px; margin:5px 0 0; min-height:20px;"></p>
+            </div>
+
+            <button id="login-btn" style="width:100%; padding:14px; background:#1976d2; color:white; border:none; border-radius:8px; font-size:16px; cursor:pointer;">Login Securely</button>
+            
+            <p id="auth-message" style="min-height:24px; margin-top:15px; text-align:center;"></p>
+            
+            <button id="switch-to-register" style="margin-top:15px; background:none; border:none; color:#1976d2; cursor:pointer; font-size:14px;">New to Northbridge? Open an Account</button>
+        </div>
+
+        <div id="register-form" style="display: none;">
+            <h2>Create Your Northbridge Account</h2>
+            <input type="text" id="register-name" placeholder="Full Name" required>
+            <input type="email" id="register-email" placeholder="Email Address" required>
+            <input type="password" id="register-password" placeholder="Password (min 6 characters)" required>
+            <button id="register-btn">Register Now</button>
+            <p id="auth-message"></p>
+            <button id="switch-to-login">Already have an account? Login</button>
+        </div>
+    </div>
+
+    <footer>
+        <p>&copy; 2026 Northbridge Bank. All rights reserved.</p>
+        <p style="font-size: 12px; color: #666; margin-top: 10px;">
+            Northbridge Bank is a licensed financial institution. Deposits protected up to applicable limits. 
+            Your connection is secured with 256-bit SSL encryption.
+        </p>
+    </footer>
+
+    <script src="script.js"></script>
+</body>
+</html>

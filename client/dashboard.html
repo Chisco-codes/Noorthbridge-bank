@@ -1,0 +1,146 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Dashboard - Northbridge Bank</title>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <link rel="stylesheet" href="styles.css">
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/html2pdf.js/0.9.2/html2pdf.bundle.min.js"></script>
+</head>
+<body>
+    <header>
+        <div class="logo">
+            <img src="https://www.nbfc.com/wp-content/uploads/2015/06/white-nb_fairfax_smallscaleuses_PMSC-EN.png" alt="Northbridge Bank Logo" height="50">
+            <h1>Northbridge Bank</h1>
+        </div>
+        <div class="user-info">
+            <p>Welcome back, <strong><span id="user-name">User</span></strong></p>
+            <div class="header-buttons">
+                <button id="notifications-btn">🔔</button>
+                <button id="admin-panel-btn" style="display:none;">Admin Panel</button>
+                <button id="dark-mode-toggle">🌙 Dark</button>
+                <button id="logout-btn">Logout</button>
+            </div>
+        </div>
+    </header>
+
+    <!-- Main Dashboard Grid -->
+    <div class="dashboard-grid">
+        <!-- Account Balance Card -->
+        <div class="balance-card">
+            <div class="balance-header">
+                <img id="profile-img" src="https://picsum.photos/150/150?random=1" alt="Profile Picture" class="profile-in-card">
+                <div class="upload-controls">
+                    <input type="file" id="image-upload" accept="image/*" style="display: none;">
+                    <button id="upload-btn" class="edit-photo-btn">Edit Photo</button>
+                </div>
+            </div>
+            <img src="https://media.istockphoto.com/id/2153156063/vector/color-icon-set-related-to-money.jpg?s=612x612&w=0&k=20&c=Bp2LpIBJ9cEx7yP_j3SbuxGOePXYhrhrHTDLkCOkRCQ=" alt="Balance Icon" width="60">
+            <h3>Your Account Balance</h3>
+            <p class="balance-amount" id="user-balance">$0.00 CAD</p>
+            <p>Account Number: <span id="user-account-number"></span></p>
+            <p>Account Type: <span id="user-account-type">Chequing</span></p>
+            <p style="font-size: 14px; color: #666; margin-top: 10px;">Protected & Secure</p>
+        </div>
+
+        <!-- Quick Transfer Card -->
+        <div class="transfer-card">
+            <img src="https://media.istockphoto.com/id/929922064/vector/money-vector-icon-bank-note-dollar-bill-flying-from-sender-to-receiver-design-illustration.jpg?s=612x612&w=0&k=20&c=plIG3Ez__316pTCctj7hGggr2dCsyS1FLLi2s_yPpnY=" alt="Transfer Icon" width="80">
+            <h3>Quick Transfer</h3>
+            <input type="text" id="transfer-to" placeholder="Recipient Account Number" required>
+            <input type="number" id="transfer-amount" placeholder="Amount ($)" min="0.01" step="0.01" required>
+            <button id="transfer-btn">Send Transfer</button>
+        </div>
+
+        <!-- Recent Transactions Card -->
+        <div class="transactions-card">
+            <img src="https://i.pinimg.com/736x/95/3b/c4/953bc484da38c2f59a01a62eb3cc3f78.jpg" alt="Transactions Icon" width="80">
+            <h3>Recent Transactions</h3>
+            <ul id="transaction-list"></ul>
+            <button id="view-all-btn">View Full History</button>
+        </div>
+
+        <!-- Account Summary Card -->
+        <div class="summary-card">
+            <img src="https://c8.alamy.com/comp/2R8YXCD/trendy-flat-color-icons-for-finance-bank-accounting-business-analysis-including-budget-management-economy-financial-investment-expenses-banking-protection-contract-vector-illustration-2R8YXCD.jpg" alt="Summary Icon" width="80">
+            <h3>Account Summary</h3>
+            <p>Total Transactions: <span id="total-transactions">0</span></p>
+            <p>Last Login: <span id="last-login">Today</span></p>
+            <p>Account Status: <span style="color: green;">Active & Secure</span></p>
+            <button id="settings-btn">Account Settings</button>
+        </div>
+
+        <!-- Transfer Confirmation Modal -->
+<div id="transfer-modal" style="display:none; position:fixed; top:0; left:0; width:100%; height:100%; background:rgba(0,0,0,0.7); z-index:10000; display:flex; align-items:center; justify-content:center;">
+    <div style="background:white; padding:30px; border-radius:20px; max-width:90%; width:500px; text-align:center; box-shadow:0 10px 30px rgba(0,0,0,0.2);">
+        <h2 id="modal-title" style="color:#1976d2;">Confirm Transfer</h2>
+        <div id="transfer-form-content">
+            <input type="text" id="modal-to-account" placeholder="Recipient Account Number" required style="width:100%; margin:10px 0;">
+            <input type="number" id="modal-amount" placeholder="Amount ($)" min="0.01" step="0.01" required style="width:100%; margin:10px 0;">
+            <input type="text" id="modal-description" placeholder="Description (optional)" style="width:100%; margin:10px 0;">
+            <button id="confirm-transfer-btn" style="width:100%; padding:12px; background:#1976d2; color:white; border:none; border-radius:8px; cursor:pointer;">Confirm & Send</button>
+        </div>
+        <div id="receipt-content" style="display:none;">
+            <img src="https://www.nbfc.com/wp-content/uploads/2015/06/white-nb_fairfax_smallscaleuses_PMSC-EN.png" alt="Northbridge Bank Logo" width="100" style="margin-bottom:20px;">
+            <h2 style="color:#28a745;">Transfer Successful!</h2>
+            <p><strong>Amount:</strong> <span id="receipt-amount"></span> CAD</p>
+            <p><strong>Recipient:</strong> <span id="receipt-recipient"></span></p>
+            <p><strong>Date:</strong> <span id="receipt-date"></span></p>
+            <p><strong>Transaction ID:</strong> <span id="receipt-id"></span></p>
+            <p><strong>Description:</strong> <span id="receipt-description">None</span></p>
+            <button id="download-receipt-btn" style="margin-top:20px; padding:12px; background:#1976d2; color:white; border:none; border-radius:8px; cursor:pointer;">Download Receipt</button>
+            <p style="margin-top:10px; color:#666;">Modal will close in 5 seconds...</p>
+        </div>
+        <button id="close-modal-btn" style="margin-top:20px; width:100%; padding:12px; background:#dc3545; color:white; border:none; border-radius:8px; cursor:pointer;">Close</button>
+    </div>
+</div>
+    </div>
+
+    <!-- Balance Flow Chart -->
+    <div class="chart-container">
+        <h2>Balance Flow</h2>
+        <div class="chart-tabs">
+            <button class="tab-btn active" data-period="month">This Month</button>
+            <button class="tab-btn" data-period="year">This Year</button>
+        </div>
+        <canvas id="balance-flow-chart" height="300"></canvas>
+    </div>
+
+    <!-- Live Chat Button -->
+    <div class="live-chat-container">
+        <button id="chat-toggle" class="chat-btn">
+            <span class="chat-icon">💬</span>
+            <span class="chat-bubble">
+                <span class="arrow"></span>
+                <span class="message">Need help?</span>
+            </span>
+        </button>
+    </div>
+
+    <!-- Transfer Modal - Starts Hidden -->
+    <div id="transfer-modal" style="display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.7); z-index: 10000; align-items: center; justify-content: center;">
+        <div style="background: white; padding: 40px; border-radius: 20px; max-width: 400px; width: 90%; text-align: center; box-shadow: 0 10px 30px rgba(0,0,0,0.3);">
+            <h2 style="color: #1976d2;">Confirm Transfer</h2>
+            <input type="text" id="modal-to" placeholder="Recipient Account Number" required style="width: 100%; padding: 12px; margin: 10px 0; border: 1px solid #ccc; border-radius: 8px;">
+            <input type="number" id="modal-amount" placeholder="Amount ($)" min="0.01" step="0.01" required style="width: 100%; padding: 12px; margin: 10px 0; border: 1px solid #ccc; border-radius: 8px;">
+            <input type="text" id="modal-description" placeholder="Description (optional)" style="width: 100%; padding: 12px; margin: 10px 0; border: 1px solid #ccc; border-radius: 8px;">
+            <button id="confirm-transfer" style="width: 100%; padding: 14px; background: #1976d2; color: white; border: none; border-radius: 8px; cursor: pointer; font-weight: bold;">
+                Confirm & Send
+            </button>
+            <button id="cancel-transfer" style="width: 100%; margin-top: 10px; padding: 14px; background: #dc3545; color: white; border: none; border-radius: 8px; cursor: pointer;">
+                Cancel
+            </button>
+        </div>
+    </div>
+
+    <footer>
+        <p>&copy; 2026 Northbridge Bank. All rights reserved.</p>
+        <p style="font-size: 12px; color: #666;">
+            Your session is protected with 256-bit encryption. Deposits insured up to applicable limits.
+        </p>
+    </footer>
+
+    <script src="dashboard.js"></script>
+</body>
+</html>
