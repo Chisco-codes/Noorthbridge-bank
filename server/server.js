@@ -10,8 +10,6 @@ require('dotenv').config();
 
 const app = express();
 app.use(express.json());
-
-// STRONGER CORS - FIXES CROSS-ORIGIN ISSUES ON PHONE & LAPTOP
 app.use(cors({
   origin: '*', // Allow all origins (safe for live deployment)
   credentials: true,
@@ -30,14 +28,14 @@ const transporter = nodemailer.createTransport({
   },
 });
 
-// MongoDB Connection with retry (WORKS ON RENDER SLEEP/WAKE)
+// MongoDB Connection with retry (FIXED: Removed deprecated options for Mongoose v8+)
 const connectDB = async () => {
   try {
     await mongoose.connect(process.env.MONGO_URI);
     console.log('MongoDB connected');
   } catch (err) {
     console.error('MongoDB connection error:', err.message);
-    console.log('Retrying connection in 5 seconds...');
+    // Retry after 5 seconds
     setTimeout(connectDB, 5000);
   }
 };
@@ -150,10 +148,10 @@ app.post('/api/transaction/transfer', [auth, body('toAccount').notEmpty(), body(
               <style>
                 body { font-family: 'Helvetica Neue', Arial, sans-serif; margin: 0; padding: 0; }
                 .container { max-width: 600px; margin: 20px auto; border-radius: 16px; overflow: hidden; box-shadow: 0 8px 24px rgba(0,0,0,0.15); }
-                .header { background: #0d47a1; padding: 40px; text-align: center; }
-                .header h1 { color: white; margin: 0; font-size: 32px; font-weight: 300; letter-spacing: 1px; }
+                .header { background: #0d47a1; padding: 50px 40px; text-align: center; }
+                .header h1 { color: white; margin: 0; font-size: 36px; font-weight: 300; letter-spacing: 1px; }
                 .content { padding: 50px 40px; text-align: center; background: #1a1a1a; color: #e0e0e0; }
-                .code-box { background: #2d2d2d; border-radius: 16px; padding: 35px; margin: 40px auto; max-width: 320px; font-size: 40px; font-weight: bold; letter-spacing: 10px; color: #bbdefb; }
+                .code-box { background: #2d2d2d; border-radius: 16px; padding: 40px; margin: 40px auto; max-width: 320px; font-size: 42px; font-weight: bold; letter-spacing: 12px; color: #bbdefb; }
                 .footer { background: #0d0d0d; padding: 30px; text-align: center; font-size: 13px; color: #888888; }
                 @media (prefers-color-scheme: light) {
                   .content, .footer { background: #ffffff !important; color: #333333 !important; }
