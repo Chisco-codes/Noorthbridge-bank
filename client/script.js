@@ -1,4 +1,4 @@
-const API_BASE = 'https://northbridge-bank-api.onrender.com/api';
+const API_BASE ='https://northbridge-bank-api.onrender.com/api';
 // Wait for DOM to load before attaching events
 document.addEventListener('DOMContentLoaded', () => {
     console.log('DOM loaded, attaching events'); // Debug

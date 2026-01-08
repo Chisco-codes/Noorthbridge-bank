@@ -1,4 +1,4 @@
-const API_BASE = 'https://northbridge-bank-api.onrender.com/api';
+const API_BASE ='https://northbridge-bank-api.onrender.com/api';
 // Toast Notification System
 function showNotification(message, type = 'success') {
     const notification = document.createElement('div');
