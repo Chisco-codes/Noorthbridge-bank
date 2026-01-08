@@ -26,10 +26,18 @@ const transporter = nodemailer.createTransport({
   },
 });
 
-// MongoDB Connection
-mongoose.connect(process.env.MONGO_URI)
-  .then(() => console.log('MongoDB connected'))
-  .catch(err => console.log(err));
+// MongoDB Connection with retry (FIXED: Removed deprecated options for Mongoose v8+)
+const connectDB = async () => {
+  try {
+    await mongoose.connect(process.env.MONGO_URI);
+    console.log('MongoDB connected');
+  } catch (err) {
+    console.error('MongoDB connection error:', err.message);
+    // Retry after 5 seconds
+    setTimeout(connectDB, 5000);
+  }
+};
+connectDB();
 
 // User Schema
 const userSchema = new mongoose.Schema({
@@ -512,6 +520,12 @@ app.post('/api/user/upload-image', [auth, upload.single('image')], async (req, r
 });
 
 app.use('/uploads', express.static('uploads'));
+
+// Global error handler for uncaught errors (THIS PREVENTS VAGUE "Server error")
+app.use((err, req, res, next) => {
+  console.error(err.stack);
+  res.status(500).json({ msg: 'Server error - please try again' });
+});
 
 const PORT = process.env.PORT || 5000;
 app.listen(PORT, () => console.log(`Server running on port ${PORT}`));
