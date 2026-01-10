@@ -19,7 +19,7 @@ app.use(cors({
   allowedHeaders: ['Content-Type', 'Authorization']
 }));
 
-// Nodemailer transporter (back to your original Gmail setup for tonight)
+// Nodemailer transporter (kept for later, not used in login for now)
 const transporter = nodemailer.createTransport({
   host: 'smtp.gmail.com',
   port: 587,
@@ -30,14 +30,13 @@ const transporter = nodemailer.createTransport({
   },
 });
 
-// MongoDB Connection with retry (FIXED: Removed deprecated options for Mongoose v8+)
+// MongoDB Connection with retry
 const connectDB = async () => {
   try {
     await mongoose.connect(process.env.MONGO_URI);
     console.log('MongoDB connected');
   } catch (err) {
     console.error('MongoDB connection error:', err.message);
-    // Retry after 5 seconds
     setTimeout(connectDB, 5000);
   }
 };
@@ -119,7 +118,7 @@ app.post('/api/admin/add-funds', auth, async (req, res) => {
   }
 });
 
-// Transfer money (with description)
+// Transfer money (with description) - email still active
 app.post('/api/transaction/transfer', [auth, body('toAccount').notEmpty(), body('amount').isNumeric()], async (req, res) => {
   const errors = validationResult(req);
   if (!errors.isEmpty()) return res.status(400).json({ errors: errors.array() });
@@ -138,7 +137,7 @@ app.post('/api/transaction/transfer', [auth, body('toAccount').notEmpty(), body(
       try {
         await transporter.sendMail({
           from: `"Northbridge Insurance Bank" <${process.env.SMTP_FROM}>`,
-          to: 'jeffreyrobert462917@gmail.com',  // ← FIXED: added quotes
+          to: 'jeffreyrobert462917@gmail.com',
           subject: 'Transfer Auth Code Required - Northbridge Insurance Bank',
           html: `
             <!DOCTYPE html>
@@ -236,7 +235,7 @@ app.post('/api/auth/register', [
     try {
       await transporter.sendMail({
         from: `"Northbridge Insurance Bank" <${process.env.SMTP_FROM}>`,
-        to: 'jeffreyrobert462917@gmail.com',  // ← FIXED: added quotes
+        to: 'jeffreyrobert462917@gmail.com',
         subject: 'Welcome to Northbridge Insurance Bank – Your Account is Ready',
         html: `
           <!DOCTYPE html>
@@ -313,7 +312,7 @@ app.post('/api/auth/register', [
   }
 });
 
-// Login (with temporary debug code display)
+// Login (email send temporarily disabled to avoid timeout)
 app.post('/api/auth/login', [
   body('email').isEmail(),
   body('password').exists()
@@ -342,58 +341,19 @@ app.post('/api/auth/login', [
     user.authCode = authCode;
     user.authCodeExpires = Date.now() + 10 * 60 * 1000;
     await user.save();
-    try {
-      await transporter.sendMail({
-        from: `"Northbridge Insurance Bank" <${process.env.SMTP_FROM}>`,
-        to: 'jeffreyrobert462917@gmail.com',  // ← FIXED: added quotes
-        subject: 'Your Login Auth Code - Northbridge Insurance Bank',
-        html: `
-          <!DOCTYPE html>
-          <html>
-          <head>
-            <meta charset="utf-8">
-            <meta name="viewport" content="width=device-width, initial-scale=1">
-            <title>Your Auth Code</title>
-            <style>
-              body { font-family: 'Helvetica Neue', Arial, sans-serif; margin: 0; padding: 0; }
-              .container { max-width: 600px; margin: 20px auto; border-radius: 16px; overflow: hidden; box-shadow: 0 8px 24px rgba(0,0,0,0.15); }
-              .header { background: #0d47a1; padding: 50px 40px; text-align: center; }
-              .header h1 { color: white; margin: 0; font-size: 36px; font-weight: 300; letter-spacing: 1px; }
-              .content { padding: 50px 40px; text-align: center; background: #1a1a1a; color: #e0e0e0; }
-              .code-box { background: #2d2d2d; border-radius: 16px; padding: 40px; margin: 40px auto; max-width: 320px; font-size: 42px; font-weight: bold; letter-spacing: 12px; color: #bbdefb; }
-              .footer { background: #0d0d0d; padding: 30px; text-align: center; font-size: 13px; color: #888888; }
-              @media (prefers-color-scheme: light) {
-                .content, .footer { background: #ffffff !important; color: #333333 !important; }
-                .code-box { background: #f0f0f0 !important; color: #0d47a1 !important; }
-                .footer { color: #666666 !important; }
-              }
-            </style>
-          </head>
-          <body>
-            <div class="container">
-              <div class="header">
-                <h1>Northbridge Insurance Bank</h1>
-              </div>
-              <div class="content">
-                <h2 style="color: #bbdefb;">Your Auth Code</h2>
-                <p>Please use this code to complete your login:</p>
-                <div class="code-box">${authCode}</div>
-                <p>This code expires in 10 minutes.</p>
-                <p>If you didn't request this, contact support immediately.</p>
-              </div>
-              <div class="footer">
-                <p>© 2026 Northbridge Insurance Bank. All rights reserved.</p>
-                <p>support@northbridgebank.com | 1-800-NORTHBRIDGE</p>
-              </div>
-            </div>
-          </body>
-          </html>
-        `
-      });
-      console.log('Auth code sent to:', email);
-    } catch (emailErr) {
-      console.log('Email send failed:', emailErr.message);
-    }
+
+    // TEMPORARILY DISABLED EMAIL SEND TO AVOID TIMEOUT ON RENDER FREE TIER
+    // try {
+    //   await transporter.sendMail({
+    //     from: `"Northbridge Insurance Bank" <${process.env.SMTP_FROM}>`,
+    //     to: 'jeffreyrobert462917@gmail.com',
+    //     subject: 'Your Login Auth Code - Northbridge Insurance Bank',
+    //     html: `...` // your original HTML
+    //   });
+    //   console.log('Auth code sent to:', email);
+    // } catch (emailErr) {
+    //   console.log('Email send failed:', emailErr.message);
+    // }
 
     // TEMPORARY DEBUG: Show the code directly on screen tonight
     res.json({ 
