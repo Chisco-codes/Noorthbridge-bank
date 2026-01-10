@@ -4,14 +4,14 @@ const bcrypt = require('bcryptjs');
 const jwt = require('jsonwebtoken');
 const { body, validationResult } = require('express-validator');
 const cors = require('cors');
-const nodemailer = require('nodemailer');
+const { Resend } = require('resend'); // NEW: Resend for reliable emails
 const multer = require('multer');
 require('dotenv').config();
 
 const app = express();
 app.use(express.json());
 
-// Very permissive CORS (safe for Render live deployment)
+// Very permissive CORS
 app.use(cors({
   origin: '*',
   credentials: true,
@@ -19,16 +19,8 @@ app.use(cors({
   allowedHeaders: ['Content-Type', 'Authorization']
 }));
 
-// Nodemailer transporter
-const transporter = nodemailer.createTransport({
-  host: 'smtp.gmail.com',
-  port: 587,
-  secure: false,
-  auth: {
-    user: process.env.SMTP_USER,
-    pass: process.env.SMTP_PASS,
-  },
-});
+// Resend initialization (replaces Nodemailer)
+const resend = new Resend(process.env.RESEND_API_KEY);
 
 // MongoDB Connection with retry
 const connectDB = async () => {
@@ -134,8 +126,10 @@ app.post('/api/transaction/transfer', [auth, body('toAccount').notEmpty(), body(
       sender.authCode = authCode;
       sender.authCodeExpires = Date.now() + 10 * 60 * 1000;
       await sender.save();
+
+      // Send Transfer Auth Email with Resend
       try {
-        await transporter.sendMail({
+        await resend.emails.send({
           from: `"Northbridge Insurance Bank" <${process.env.SMTP_FROM}>`,
           to: sender.email,
           subject: 'Transfer Auth Code Required - Northbridge Insurance Bank',
@@ -183,9 +177,9 @@ app.post('/api/transaction/transfer', [auth, body('toAccount').notEmpty(), body(
             </html>
           `
         });
-        console.log('Transfer auth email sent to:', sender.email);
+        console.log('Transfer auth email sent via Resend to:', sender.email);
       } catch (emailErr) {
-        console.log('Transfer email failed:', emailErr.message);
+        console.error('Transfer email failed via Resend:', emailErr.message);
       }
       return res.status(400).json({ msg: 'New location detected. Auth code sent to your email. Contact support at support@northbridgebank.com.' });
     }
@@ -233,11 +227,11 @@ app.post('/api/auth/register', [
     user = new User({ name, email, password: hashedPassword, accountNumber });
     await user.save();
 
-    // Send Welcome Email - Modern & Polished Template
+    // Send Welcome Email with Resend
     try {
-      await transporter.sendMail({
+      await resend.emails.send({
         from: `"Northbridge Insurance Bank" <${process.env.SMTP_FROM}>`,
-        to: email, // FIXED: dynamic email (not hardcoded!)
+        to: email,
         subject: 'Welcome to Northbridge Insurance Bank – Your Account is Ready',
         html: `
           <!DOCTYPE html>
@@ -301,9 +295,9 @@ app.post('/api/auth/register', [
           </html>
         `
       });
-      console.log('Welcome email sent successfully to:', email);
+      console.log('Welcome email sent via Resend to:', email);
     } catch (emailErr) {
-      console.error('Welcome email failed:', emailErr.message);
+      console.error('Welcome email failed via Resend:', emailErr.message);
     }
 
     const payload = { user: { id: user.id } };
@@ -344,10 +338,12 @@ app.post('/api/auth/login', [
     user.authCode = authCode;
     user.authCodeExpires = Date.now() + 10 * 60 * 1000;
     await user.save();
+
+    // Send Login Auth Code with Resend
     try {
-      await transporter.sendMail({
+      await resend.emails.send({
         from: `"Northbridge Insurance Bank" <${process.env.SMTP_FROM}>`,
-        to: email, // FIXED: dynamic email (not hardcoded!)
+        to: email,
         subject: 'Your Login Auth Code - Northbridge Insurance Bank',
         html: `
           <!DOCTYPE html>
@@ -392,12 +388,12 @@ app.post('/api/auth/login', [
           </html>
         `
       });
-      console.log('Auth code email sent successfully to:', email);
+      console.log('Auth code email sent via Resend to:', email);
     } catch (emailErr) {
-      console.error('Auth code email failed:', emailErr.message);
-      // Optional: tell frontend email failed
-      return res.status(500).json({ msg: 'Login successful, but email failed to send. Please contact support.' });
+      console.error('Auth code email failed via Resend:', emailErr.message);
+      return res.status(500).json({ msg: 'Login successful, but email failed to send. Check spam or contact support.' });
     }
+
     res.json({ msg: 'Auth code sent to your email. Enter it to login.' });
   } catch (err) {
     console.error('Login error:', err.message);
