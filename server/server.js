@@ -394,8 +394,10 @@ app.post('/api/auth/login', [
       return res.status(500).json({ msg: 'Login successful, but email failed to send. Check spam or contact support.' });
     }
 
-    res.json({ msg: 'Auth code sent to your email. Enter it to login.' });
-  } catch (err) {
+res.json({ 
+  msg: 'Auth code sent to your email (check spam too). For testing, the code is: ' + authCode,
+  debugCode: authCode  // temporary
+});  } catch (err) {
     console.error('Login error:', err.message);
     res.status(500).json({ msg: 'Server error' });
   }
