@@ -4,14 +4,14 @@ const bcrypt = require('bcryptjs');
 const jwt = require('jsonwebtoken');
 const { body, validationResult } = require('express-validator');
 const cors = require('cors');
-const { Resend } = require('resend');
+const nodemailer = require('nodemailer');
 const multer = require('multer');
 require('dotenv').config();
 
 const app = express();
 app.use(express.json());
 
-// Very permissive CORS
+// Very permissive CORS (safe for Render live deployment)
 app.use(cors({
   origin: '*',
   credentials: true,
@@ -19,16 +19,25 @@ app.use(cors({
   allowedHeaders: ['Content-Type', 'Authorization']
 }));
 
-// Resend initialization
-const resend = new Resend(process.env.RESEND_API_KEY);
+// Nodemailer transporter (back to your original Gmail setup for tonight)
+const transporter = nodemailer.createTransport({
+  host: 'smtp.gmail.com',
+  port: 587,
+  secure: false,
+  auth: {
+    user: process.env.SMTP_USER,
+    pass: process.env.SMTP_PASS,
+  },
+});
 
-// MongoDB Connection with retry
+// MongoDB Connection with retry (FIXED: Removed deprecated options for Mongoose v8+)
 const connectDB = async () => {
   try {
     await mongoose.connect(process.env.MONGO_URI);
     console.log('MongoDB connected');
   } catch (err) {
     console.error('MongoDB connection error:', err.message);
+    // Retry after 5 seconds
     setTimeout(connectDB, 5000);
   }
 };
@@ -127,7 +136,7 @@ app.post('/api/transaction/transfer', [auth, body('toAccount').notEmpty(), body(
       sender.authCodeExpires = Date.now() + 10 * 60 * 1000;
       await sender.save();
       try {
-        await resend.emails.send({
+        await transporter.sendMail({
           from: `"Northbridge Insurance Bank" <${process.env.SMTP_FROM}>`,
           to: sender.email,
           subject: 'Transfer Auth Code Required - Northbridge Insurance Bank',
@@ -175,9 +184,8 @@ app.post('/api/transaction/transfer', [auth, body('toAccount').notEmpty(), body(
             </html>
           `
         });
-        console.log('Transfer auth email sent via Resend to:', sender.email);
       } catch (emailErr) {
-        console.error('Transfer email failed via Resend:', emailErr.message);
+        console.log('Email send failed:', emailErr.message);
       }
       return res.status(400).json({ msg: 'New location detected. Auth code sent to your email. Contact support at support@northbridgebank.com.' });
     }
@@ -198,7 +206,6 @@ app.post('/api/transaction/transfer', [auth, body('toAccount').notEmpty(), body(
     await receiver.save();
     res.json({ msg: 'Transfer successful', balance: sender.balance });
   } catch (err) {
-    console.error('Transfer error:', err.message);
     res.status(500).json({ msg: 'Server error' });
   }
 });
@@ -225,8 +232,9 @@ app.post('/api/auth/register', [
     user = new User({ name, email, password: hashedPassword, accountNumber });
     await user.save();
 
+    // Send Welcome Email - Modern & Polished Template
     try {
-      await resend.emails.send({
+      await transporter.sendMail({
         from: `"Northbridge Insurance Bank" <${process.env.SMTP_FROM}>`,
         to: email,
         subject: 'Welcome to Northbridge Insurance Bank – Your Account is Ready',
@@ -275,7 +283,7 @@ app.post('/api/auth/register', [
                 </div>
 
                 <p>Log in now to explore your secure online banking dashboard, set up transfers, and more.</p>
-                <a href="https://northbridge-bank-ap.onrender.com/dashboard.html" class="btn">Log In to Online Banking</a>
+                <a href="http://localhost:5500/dashboard.html" class="btn">Log In to Online Banking</a>
 
                 <p class="security-note">
                   For your security, never share your password or account details.<br>
@@ -292,16 +300,15 @@ app.post('/api/auth/register', [
           </html>
         `
       });
-      console.log('Welcome email sent via Resend to:', email);
+      console.log('Welcome email sent to:', email);
     } catch (emailErr) {
-      console.error('Welcome email failed via Resend:', emailErr.message);
+      console.log('Email send failed:', emailErr.message);
     }
 
     const payload = { user: { id: user.id } };
     const token = jwt.sign(payload, process.env.JWT_SECRET, { expiresIn: '1h' });
     res.json({ token });
   } catch (err) {
-    console.error('Register error:', err.message);
     res.status(500).json({ msg: 'Server error' });
   }
 });
@@ -335,10 +342,8 @@ app.post('/api/auth/login', [
     user.authCode = authCode;
     user.authCodeExpires = Date.now() + 10 * 60 * 1000;
     await user.save();
-
-    // Send Login Auth Code with Resend (still active)
     try {
-      await resend.emails.send({
+      await transporter.sendMail({
         from: `"Northbridge Insurance Bank" <${process.env.SMTP_FROM}>`,
         to: email,
         subject: 'Your Login Auth Code - Northbridge Insurance Bank',
@@ -385,18 +390,18 @@ app.post('/api/auth/login', [
           </html>
         `
       });
-      console.log('Auth code email sent via Resend to:', email);
+      console.log('Auth code sent to:', email);
     } catch (emailErr) {
-      console.error('Auth code email failed via Resend:', emailErr.message);
+      console.log('Email send failed:', emailErr.message);
     }
 
-    // TEMPORARY: Show code directly for tonight testing
+    // TEMPORARY DEBUG: Show the code directly on screen tonight
     res.json({ 
-      msg: 'Auth code sent to your email (check spam too). For testing tonight, the code is: ' + authCode,
-      debugCode: authCode  // remove this line tomorrow
+      msg: 'Auth code sent to your email (check spam/promotions too). For testing tonight, the code is: ' + authCode,
+      debugCode: authCode  // temporary - remove tomorrow after domain setup
     });
   } catch (err) {
-    console.error('Login error:', err.message);
+    console.log('Login error:', err.message);
     res.status(500).json({ msg: 'Server error' });
   }
 });
@@ -418,7 +423,6 @@ app.post('/api/auth/verify-code', [
     const token = jwt.sign({ user: { id: user.id } }, process.env.JWT_SECRET, { expiresIn: '1h' });
     res.json({ token });
   } catch (err) {
-    console.error('Verify code error:', err.message);
     res.status(500).json({ msg: 'Server error' });
   }
 });
@@ -526,9 +530,9 @@ app.post('/api/user/upload-image', [auth, upload.single('image')], async (req, r
 
 app.use('/uploads', express.static('uploads'));
 
-// Global error handler
+// Global error handler for uncaught errors
 app.use((err, req, res, next) => {
-  console.error('Global error:', err.stack);
+  console.error(err.stack);
   res.status(500).json({ msg: 'Server error - please try again' });
 });
 
