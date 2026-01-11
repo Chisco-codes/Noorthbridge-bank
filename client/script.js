@@ -1,4 +1,5 @@
-const API_BASE ='https://northbridge-bank-api.onrender.com/api';
+const API_BASE = 'https://northbridge-bank-api.onrender.com/api';
+
 // Wait for DOM to load before attaching events
 document.addEventListener('DOMContentLoaded', () => {
     console.log('DOM loaded, attaching events'); // Debug
@@ -113,7 +114,7 @@ document.addEventListener('DOMContentLoaded', () => {
         }
     });
 
-    // === IMPROVED LOGIN WITH FIELD-SPECIFIC ERRORS ===
+    // === IMPROVED LOGIN WITH FIELD-SPECIFIC ERRORS + DEBUG ===
     document.getElementById('login-btn')?.addEventListener('click', async (e) => {
         e.preventDefault();
 
@@ -157,13 +158,21 @@ document.addEventListener('DOMContentLoaded', () => {
                 body: JSON.stringify({ email, password })
             });
 
+            console.log('Login response status:', res.status); // Debug: see if 200
+
             const data = await res.json();
+            console.log('Login response data:', data); // Debug: this will show the msg/debugCode!
 
             if (res.ok) {
+                // TEMPORARY DEBUG ALERT: Show the code in popup so you can't miss it
+                if (data.debugCode) {
+                    alert('DEBUG CODE: ' + data.debugCode + '\n\nEnter this in the box below!');
+                }
+
                 // Success: Show auth code form
                 document.getElementById('login-form').innerHTML = `
                     <h2>Enter Auth Code</h2>
-                    <p style="color:#666; font-size:14px;">Check your email for the 6-digit code.</p>
+                    <p style="color:#666; font-size:14px;">Check your email for the 6-digit code (or use the popup/debug code).</p>
                     <input type="text" id="auth-code" placeholder="6-digit code" maxlength="6" required style="text-align:center; letter-spacing:8px; font-size:24px;">
                     <button id="verify-code-btn" style="margin-top:20px;">Verify Code</button>
                     <p id="auth-code-error" style="color:red; min-height:20px; margin-top:10px;"></p>
@@ -216,6 +225,7 @@ document.addEventListener('DOMContentLoaded', () => {
                 document.getElementById('auth-message').style.color = 'red';
             }
         } catch (err) {
+            console.error('Login fetch error:', err);
             document.getElementById('auth-message').textContent = 'Network error. Please try again.';
             document.getElementById('auth-message').style.color = 'red';
         } finally {
