@@ -1,4 +1,4 @@
-const API_BASE = 'http://localhost:5000/api';
+const API_BASE = 'https://northbridge-bank-api.onrender.com/api';
 
 // Toast Notification System (Same as dashboard)
 function showNotification(message, type = 'success') {
@@ -44,14 +44,25 @@ async function loadAdmin() {
             headers: { 'Authorization': `Bearer ${token}` }
         });
 
-        if (res.status === 403 || res.status === 401) {
-            showNotification('Access denied. Admins only.', 'error');
-            setTimeout(() => window.location.href = 'dashboard.html', 2000);
+        console.log('Admin users fetch status:', res.status); // Debug
+
+        if (res.status === 403) {
+            showNotification('Access denied. Admins only. Logging you out...', 'error');
+            localStorage.removeItem('token');
+            setTimeout(() => window.location.href = 'index.html', 2000);
+            return;
+        }
+
+        if (res.status === 401) {
+            showNotification('Session expired. Please log in again.', 'error');
+            localStorage.removeItem('token');
+            setTimeout(() => window.location.href = 'index.html', 1500);
             return;
         }
 
         if (!res.ok) {
-            throw new Error('Failed to load users');
+            const errorData = await res.json();
+            throw new Error(errorData.msg || `HTTP error! status: ${res.status}`);
         }
 
         const users = await res.json();
