@@ -1,4 +1,5 @@
-const API_BASE ='https://northbridge-bank-api.onrender.com/api';
+const API_BASE = 'https://northbridge-bank-api.onrender.com/api';
+
 // Toast Notification System
 function showNotification(message, type = 'success') {
     const notification = document.createElement('div');
@@ -60,9 +61,12 @@ async function loadDashboard() {
         document.getElementById('total-transactions').textContent = user.transactions.length;
         document.getElementById('last-login').textContent = new Date().toLocaleString();
 
-        // Profile Image
+        // Profile Image - use base64 from DB (fixed)
         if (user.profileImage) {
-            document.getElementById('profile-img').src = `http://localhost:5000/${user.profileImage}?t=${Date.now()}`;
+            document.getElementById('profile-img').src = user.profileImage;
+        } else {
+            // Default placeholder if no image
+            document.getElementById('profile-img').src = 'https://via.placeholder.com/150?text=Profile';
         }
 
         // Recent Transactions
@@ -156,7 +160,7 @@ document.addEventListener('DOMContentLoaded', () => {
         transferModal.style.display = 'none';
     }
 
-    // Image Upload
+    // Image Upload - FIXED to use base64 from server
     document.getElementById('profile-img').addEventListener('click', () => document.getElementById('image-upload').click());
     document.getElementById('upload-btn').addEventListener('click', () => document.getElementById('image-upload').click());
 
@@ -164,10 +168,6 @@ document.addEventListener('DOMContentLoaded', () => {
         const token = localStorage.getItem('token');
         const file = document.getElementById('image-upload').files[0];
         if (!file) return;
-
-        const reader = new FileReader();
-        reader.onload = (e) => document.getElementById('profile-img').src = e.target.result;
-        reader.readAsDataURL(file);
 
         const formData = new FormData();
         formData.append('image', file);
@@ -180,13 +180,16 @@ document.addEventListener('DOMContentLoaded', () => {
             });
 
             const data = await res.json();
+
             if (res.ok) {
                 showNotification('Profile picture updated successfully!');
-                document.getElementById('profile-img').src = `http://localhost:5000/${data.image}?t=${Date.now()}`;
+                // Use the base64 string returned from server
+                document.getElementById('profile-img').src = data.image + '?t=' + Date.now();
             } else {
                 showNotification(data.msg || 'Upload failed', 'error');
             }
         } catch (err) {
+            console.error('Upload error:', err);
             showNotification('Network error. Try again.', 'error');
         }
     });
