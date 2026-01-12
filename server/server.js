@@ -6,6 +6,7 @@ const { body, validationResult } = require('express-validator');
 const cors = require('cors');
 const nodemailer = require('nodemailer');
 const multer = require('multer');
+const fs = require('fs'); // Added for base64 image processing
 require('dotenv').config();
 
 const app = express();
@@ -80,10 +81,11 @@ const auth = (req, res, next) => {
 
 // ======================== ROUTES ========================
 
-// Admin: List all users
+// Admin: List all users (with debug log)
 app.get('/api/admin/users', auth, async (req, res) => {
   try {
     const user = await User.findById(req.user.id);
+    console.log('Admin users check - User ID:', req.user.id, 'Role from DB:', user?.role); // Debug
     if (user.role !== 'admin') return res.status(403).json({ msg: 'Access denied' });
     const users = await User.find().select('-password');
     res.json(users);
@@ -92,10 +94,11 @@ app.get('/api/admin/users', auth, async (req, res) => {
   }
 });
 
-// Admin: Add funds to any user
+// Admin: Add funds to any user (with debug log)
 app.post('/api/admin/add-funds', auth, async (req, res) => {
   try {
     const admin = await User.findById(req.user.id);
+    console.log('Admin add-funds check - User ID:', req.user.id, 'Role from DB:', admin?.role); // Debug
     if (admin.role !== 'admin') return res.status(403).json({ msg: 'Access denied' });
 
     const { userId, amount } = req.body;
@@ -406,6 +409,7 @@ app.post('/api/transaction/deposit', [auth, body('amount').isNumeric()], async (
 
   try {
     const adminUser = await User.findById(req.user.id);
+    console.log('Admin deposit check - User ID:', req.user.id, 'Role from DB:', adminUser?.role); // Debug
     if (adminUser.role !== 'admin') {
       return res.status(403).json({ msg: 'Access denied: Admins only' });
     }
@@ -474,16 +478,30 @@ app.post('/api/user/change-password', [auth, body('oldPassword').exists(), body(
   }
 });
 
-// Profile Image Upload
+// Profile Image Upload - FIXED to use base64 (no disk needed on Render)
 const upload = multer({ dest: 'uploads/' });
 
 app.post('/api/user/upload-image', [auth, upload.single('image')], async (req, res) => {
   try {
     const user = await User.findById(req.user.id);
-    user.profileImage = req.file.path;
+
+    // Read uploaded file as base64
+    const fileBuffer = fs.readFileSync(req.file.path);
+    const base64Image = `data:${req.file.mimetype};base64,${fileBuffer.toString('base64')}`;
+
+    // Save base64 string to DB
+    user.profileImage = base64Image;
     await user.save();
-    res.json({ msg: 'Image uploaded', image: req.file.path });
+
+    // Clean up temp file
+    fs.unlinkSync(req.file.path);
+
+    res.json({ 
+      msg: 'Image uploaded successfully', 
+      image: base64Image  // Send back to frontend for immediate display
+    });
   } catch (err) {
+    console.error('Upload error:', err.message);
     res.status(500).json({ msg: 'Upload failed' });
   }
 });

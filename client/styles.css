@@ -241,7 +241,7 @@ section {
     border: 4px solid #1976d2;
 }
 
-/* Responsive */
+/* Responsive (your original one) */
 @media (max-width: 768px) {
     .hero {
         flex-direction: column;
@@ -659,141 +659,160 @@ body.dark-mode #transfer-modal input {
 }
 
 /* ================================================
-   MOBILE RESPONSIVE FIXES (added at the END)
+   FINAL MOBILE RESPONSIVE FIXES (merged & cleaned)
    ================================================ */
 
 @media (max-width: 768px) {
-  body {
-    font-size: 16px;
-    line-height: 1.5;
+  /* Force full width, no overflow */
+  html, body, .dashboard-wrapper, .container, section, .dashboard-grid {
+    overflow-x: hidden !important;
+    width: 100% !important;
+    max-width: 100% !important;
+    padding: 10px !important;
+    margin: 0 auto !important;
   }
 
-  .container, .main-content, .dashboard-wrapper, section {
-    padding: 15px;
-    width: 100%;
-    max-width: 100%;
+  /* Stack everything vertically */
+  .dashboard-grid, .balance-header, .user-info, .header-buttons, .quick-transfer, .recent-transactions, .balance-card {
+    display: flex !important;
+    flex-direction: column !important;
+    align-items: center !important;
+    gap: 20px !important;
   }
 
-  header {
-    padding: 15px;
+  /* Readable & centered text */
+  h1, h2, h3, .welcome-text, .balance-label, .overview-header {
+    font-size: 1.8rem !important;
+    text-align: center !important;
+    margin: 15px 0 !important;
   }
 
-  h1, h2 {
-    font-size: 1.8rem;
-    text-align: center;
+  /* Profile & Balance - centered & bigger */
+  .profile-in-card, #profile-img {
+    width: 110px !important;
+    height: 110px !important;
+    margin: 0 auto 20px !important;
   }
 
-  .dashboard-grid {
-    grid-template-columns: 1fr;
-    gap: 20px;
-    padding: 20px;
+  .edit-photo-btn {
+    font-size: 1rem !important;
+    padding: 10px 20px !important;
+    width: 100% !important;
+    max-width: 200px !important;
   }
 
   .balance-card {
-    font-size: 2.8rem;
-    padding: 20px;
-    text-align: center;
-    margin: 20px 0;
+    width: 100% !important;
+    padding: 25px 15px !important;
+    text-align: center !important;
   }
 
+  .balance-amount {
+    font-size: 3.5rem !important;
+    margin: 15px 0 !important;
+  }
+
+  /* Quick Transfer & Transactions - full width */
+  .quick-transfer input, .quick-transfer button, .send-transfer-btn {
+    width: 100% !important;
+    margin: 12px 0 !important;
+    font-size: 1.2rem !important;
+    padding: 14px !important;
+  }
+
+  .transactions-card ul li {
+    flex-direction: column !important;
+    align-items: flex-start !important;
+    font-size: 1.1rem !important;
+    padding: 15px 10px !important;
+  }
+
+  .transaction-amount {
+    font-size: 1.5rem !important;
+  }
+
+  /* Chart - auto-size, no overflow */
+  .chart-container {
+    width: 100% !important;
+    height: auto !important;
+    min-height: 300px !important;
+    padding: 15px !important;
+    margin: 25px 0 !important;
+  }
+
+  .chart-container canvas {
+    width: 100% !important;
+    height: 280px !important;
+  }
+
+  /* Buttons - full width & tappable */
+  button, .need-help-btn, .chat-btn, .view-full-history-btn, .account-settings-btn {
+    width: 100% !important;
+    min-height: 55px !important;
+    font-size: 1.2rem !important;
+    padding: 15px !important;
+    margin: 12px 0 !important;
+    border-radius: 12px !important;
+  }
+
+  /* Hamburger & Nav - ensure mobile menu */
+  .hamburger {
+    display: flex !important;
+  }
+
+  #nav-menu {
+    display: none !important;
+  }
+
+  #nav-menu.active {
+    display: flex !important;
+    flex-direction: column !important;
+    width: 100% !important;
+    left: 0 !important;
+    background: var(--header-bg-light) !important;
+    padding: 25px !important;
+  }
+
+  /* Live chat - smaller on mobile */
+  .live-chat-container {
+    bottom: 15px !important;
+    right: 15px !important;
+  }
+
+  .chat-btn {
+    width: 55px !important;
+    height: 55px !important;
+  }
+
+  .chat-bubble {
+    font-size: 13px !important;
+    bottom: 65px !important;
+    right: -5px !important;
+  }
+}
+
+/* Super small phones */
+@media (max-width: 480px) {
   .balance-amount {
     font-size: 2.8rem !important;
   }
 
+  h1, h2 {
+    font-size: 1.6rem !important;
+  }
+
   .profile-in-card, #profile-img {
-    width: 100px;
-    height: 100px;
-    margin: 0 auto;
-  }
-
-  .edit-photo-btn {
-    font-size: 0.9rem;
-    padding: 8px 16px;
-  }
-
-  .quick-transfer, .recent-transactions, .summary-card {
-    width: 100%;
-    margin: 20px 0;
-  }
-
-  .quick-transfer input, .quick-transfer button {
-    width: 100%;
-    margin: 10px 0;
-    font-size: 1.1rem;
-    padding: 12px;
-  }
-
-  .transactions-card ul li {
-    font-size: 0.95rem;
-    flex-direction: column;
-    align-items: flex-start;
-    gap: 10px;
-  }
-
-  .transaction-amount {
-    font-size: 1.2rem;
-  }
-
-  .chart-container {
-    height: 250px !important;
-    width: 100% !important;
-    padding: 15px;
+    width: 100px !important;
+    height: 100px !important;
   }
 
   .chart-container canvas {
-    height: 200px !important;
-  }
-
-  button, .need-help-btn, .chat-btn {
-    min-height: 48px;
-    font-size: 1rem;
-    padding: 12px 20px;
-    width: 100%;
-    margin: 10px 0;
-  }
-
-  .header-buttons, .user-info {
-    flex-direction: column;
-    gap: 10px;
-    width: 100%;
-  }
-
-  .live-chat-container {
-    bottom: 15px;
-    right: 15px;
-  }
-
-  .chat-btn {
-    width: 55px;
-    height: 55px;
-  }
-
-  .chat-bubble {
-    font-size: 12px;
-    bottom: 65px;
-  }
-
-  html, body, .dashboard-wrapper {
-    overflow-x: hidden;
+    height: 240px !important;
   }
 }
 
-/* Extra small phones */
-@media (max-width: 480px) {
-  .balance-card, .balance-amount {
-    font-size: 2.2rem;
-  }
-
-  h1 {
-    font-size: 1.6rem;
-  }
-
-  .profile-in-card, #profile-img {
-    width: 90px;
-    height: 90px;
-  }
-
-  .chart-container {
-    height: 220px !important;
-  }
+/* Global safety - no overflow ever */
+* {
+  max-width: 100vw !important;
+  box-sizing: border-box !important;
 }
