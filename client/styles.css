@@ -657,3 +657,143 @@ body.dark-mode #transfer-modal input {
         display: flex;
     }
 }
+
+/* ================================================
+   MOBILE RESPONSIVE FIXES (added at the END)
+   ================================================ */
+
+@media (max-width: 768px) {
+  body {
+    font-size: 16px;
+    line-height: 1.5;
+  }
+
+  .container, .main-content, .dashboard-wrapper, section {
+    padding: 15px;
+    width: 100%;
+    max-width: 100%;
+  }
+
+  header {
+    padding: 15px;
+  }
+
+  h1, h2 {
+    font-size: 1.8rem;
+    text-align: center;
+  }
+
+  .dashboard-grid {
+    grid-template-columns: 1fr;
+    gap: 20px;
+    padding: 20px;
+  }
+
+  .balance-card {
+    font-size: 2.8rem;
+    padding: 20px;
+    text-align: center;
+    margin: 20px 0;
+  }
+
+  .balance-amount {
+    font-size: 2.8rem !important;
+  }
+
+  .profile-in-card, #profile-img {
+    width: 100px;
+    height: 100px;
+    margin: 0 auto;
+  }
+
+  .edit-photo-btn {
+    font-size: 0.9rem;
+    padding: 8px 16px;
+  }
+
+  .quick-transfer, .recent-transactions, .summary-card {
+    width: 100%;
+    margin: 20px 0;
+  }
+
+  .quick-transfer input, .quick-transfer button {
+    width: 100%;
+    margin: 10px 0;
+    font-size: 1.1rem;
+    padding: 12px;
+  }
+
+  .transactions-card ul li {
+    font-size: 0.95rem;
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 10px;
+  }
+
+  .transaction-amount {
+    font-size: 1.2rem;
+  }
+
+  .chart-container {
+    height: 250px !important;
+    width: 100% !important;
+    padding: 15px;
+  }
+
+  .chart-container canvas {
+    height: 200px !important;
+  }
+
+  button, .need-help-btn, .chat-btn {
+    min-height: 48px;
+    font-size: 1rem;
+    padding: 12px 20px;
+    width: 100%;
+    margin: 10px 0;
+  }
+
+  .header-buttons, .user-info {
+    flex-direction: column;
+    gap: 10px;
+    width: 100%;
+  }
+
+  .live-chat-container {
+    bottom: 15px;
+    right: 15px;
+  }
+
+  .chat-btn {
+    width: 55px;
+    height: 55px;
+  }
+
+  .chat-bubble {
+    font-size: 12px;
+    bottom: 65px;
+  }
+
+  html, body, .dashboard-wrapper {
+    overflow-x: hidden;
+  }
+}
+
+/* Extra small phones */
+@media (max-width: 480px) {
+  .balance-card, .balance-amount {
+    font-size: 2.2rem;
+  }
+
+  h1 {
+    font-size: 1.6rem;
+  }
+
+  .profile-in-card, #profile-img {
+    width: 90px;
+    height: 90px;
+  }
+
+  .chart-container {
+    height: 220px !important;
+  }
+}
